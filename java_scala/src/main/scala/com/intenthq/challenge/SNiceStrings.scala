@@ -1,5 +1,7 @@
 package com.intenthq.challenge
 
+import scala.annotation.tailrec
+
 object SNiceStrings {
 
 // From http://adventofcode.com/day/5
@@ -21,5 +23,33 @@ object SNiceStrings {
 //    dvszwmarrgswjxmb is naughty because it contains only one vowel.
 //    How many strings are nice?
 
-  def nice(xs: List[String]): Int = ???
+  final private val Vowels              = "aeiou"
+  final private val ForbiddenSubStrings = List("ab", "cd", "pq", "xy")
+
+  def nice(xs: List[String]): Int = xs.count(isNice)
+
+  private def isNice(text: String): Boolean =
+    hasAtLeastThreeVowels(text) && hasLettersAppearingTwiceInRow(text) && !hasForbiddenSubString(text)
+
+  private def isVowel(letter: Char): Boolean = Vowels.contains(letter.toLower)
+
+  private def hasAtLeastThreeVowels(text: String): Boolean = text.map(isVowel).count(v => v) >= 3
+
+  private def isEqualsToPreviousChar(letter: Char, previousChar: Char): Boolean = letter == previousChar
+
+  private def hasLettersAppearingTwiceInRow(text: String): Boolean = {
+
+    @tailrec
+    def finder(text: List[Char], previousCharacter: Char): Boolean =
+      text match {
+        case Nil => false
+        case firstLetter :: letters =>
+          if (isEqualsToPreviousChar(firstLetter, previousCharacter)) true
+          else finder(letters, firstLetter)
+      }
+
+    finder(text.toList, Char.MinValue)
+  }
+
+  private def hasForbiddenSubString(text: String): Boolean = ForbiddenSubStrings.exists(sub => text.contains(sub))
 }
